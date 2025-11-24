@@ -30,15 +30,15 @@ export const db = new Proxy({} as ReturnType<typeof getDb>, {
 // Initialize lyrics cache table on startup (only if DATABASE_URL is set)
 export async function initializeLyricsCache() {
   if (!process.env.DATABASE_URL) {
-    console.log("⚠️  DATABASE_URL not set - lyrics cache will be disabled");
+    console.warn("DATABASE_URL not set – skipping lyrics cache initialization");
     return;
   }
 
   try {
     const sql = neon(process.env.DATABASE_URL);
     await createLyricsCacheTable(sql);
-    console.log("✅ Lyrics cache table initialized");
   } catch (error) {
-    console.error('Failed to initialize lyrics cache:', error);
+    console.error("Failed to initialize lyrics cache:", error);
   }
 }
+
