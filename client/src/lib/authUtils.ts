@@ -1,4 +1,15 @@
 // Auth utility functions
-export function isUnauthorizedError(error: Error): boolean {
-  return /^401: .*Unauthorized/.test(error.message);
+import { useMemo } from "react";
+
+export function useAuth() {
+  const user = null;
+
+  return useMemo(
+    () => ({
+      user,
+      isAuthenticated: false,
+      isLoading: false,
+    }),
+    [user],
+  );
 }
