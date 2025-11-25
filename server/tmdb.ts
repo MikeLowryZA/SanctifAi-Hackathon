@@ -1,3 +1,6 @@
+import dotenv from "dotenv";
+dotenv.config();
+
 export interface TMDBSearchResult {
   id: number;
   title?: string;
@@ -28,6 +31,8 @@ export async function searchTMDB(
   mediaType: "movie" | "show" | "game" = "movie"
 ): Promise<TMDBFormattedResult[]> {
   const apiKey = process.env.TMDB_API_KEY;
+  console.log(`[TMDB Module] Environment check - TMDB_API_KEY: ${apiKey ? 'SET ✓' : 'NOT SET ✗'}`);
+
   if (!apiKey) {
     throw new Error("TMDB_API_KEY is not configured");
   }
@@ -102,6 +107,8 @@ export async function getTMDBDetails(
   mediaType: "movie" | "show" = "movie"
 ): Promise<TMDBFormattedResult | null> {
   const apiKey = process.env.TMDB_API_KEY;
+  console.log(`[TMDB Module] Environment check (getTMDBDetails) - TMDB_API_KEY: ${apiKey ? 'SET ✓' : 'NOT SET ✗'}`);
+
   if (!apiKey) {
     throw new Error("TMDB_API_KEY is not configured");
   }

@@ -1,3 +1,6 @@
+import dotenv from "dotenv";
+dotenv.config();
+
 import OpenAI from "openai";
 
 // Lazy initialization of OpenAI client
@@ -5,10 +8,15 @@ let openai: OpenAI | null = null;
 
 function getOpenAIClient(): OpenAI {
   if (!openai) {
-    if (!process.env.OPENAI_API_KEY) {
+    const apiKey = process.env.OPENAI_API_KEY;
+    console.log(`[OpenAI Module] Environment check - OPENAI_API_KEY: ${apiKey ? 'SET ✓' : 'NOT SET ✗'}`);
+
+    if (!apiKey) {
       throw new Error("OPENAI_API_KEY environment variable is not set");
     }
-    openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+
+    openai = new OpenAI({ apiKey });
+    console.log(`[OpenAI Module] Client initialized successfully`);
   }
   return openai;
 }
