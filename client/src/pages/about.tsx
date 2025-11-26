@@ -163,7 +163,7 @@ export default function About() {
                         Search for Content
                       </h3>
                       <p className="text-muted-foreground text-sm leading-relaxed">
-                        Enter any movie, TV show, game, or app title you're
+                        Enter any movie, TV show, book, or song title you're
                         considering.
                       </p>
                     </div>

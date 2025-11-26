@@ -93,13 +93,13 @@ export default function Home() {
       return;
     }
 
-    // For other media types (movie, show, game), use TMDB search
+    // For other media types (movie, show, book), use TMDB search
     setIsSearching(true);
     setSearchQuery({ title, mediaType: finalMediaType });
   };
 
   const handleMediaSelect = (result: any) => {
-    // Handle media selection (movies, shows, games)
+    // Handle media selection (movies, shows, books)
     const params = new URLSearchParams({ 
       title: result.title,
       mediaType: result.mediaType,

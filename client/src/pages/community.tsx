@@ -73,7 +73,7 @@ export default function Community() {
                 <div className="flex-1 text-center md:text-left space-y-3">
                   <div className="flex items-center gap-3 justify-center md:justify-start flex-wrap">
                     <h2 className="text-2xl md:text-3xl font-heading font-bold">
-                      Game & App Discernment
+                      Book & Song Title Discernment
                     </h2>
                     <Badge className="bg-primary text-primary-foreground border-0 gap-1 px-3 py-1">
                       <Sparkles className="w-3 h-3" />
@@ -81,15 +81,15 @@ export default function Community() {
                     </Badge>
                   </div>
                   <p className="text-base md:text-lg text-muted-foreground leading-relaxed">
-                    Exciting news! We're expanding our faith-based analysis to include video games and mobile apps.
+                    Exciting news! We're expanding our faith-based analysis to include books and song titles.
                     Get discernment scores, biblical insights, and age-appropriate recommendations for the digital entertainment your family enjoys.
                   </p>
                   <div className="flex flex-wrap gap-2 justify-center md:justify-start pt-2">
                     <Badge variant="secondary" className="text-xs">
-                      Video Games
+                      Books
                     </Badge>
                     <Badge variant="secondary" className="text-xs">
-                      Mobile Apps
+                      Song Titles
                     </Badge>
                     <Badge variant="secondary" className="text-xs">
                       Biblical Analysis

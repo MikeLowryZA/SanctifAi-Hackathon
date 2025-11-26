@@ -89,7 +89,7 @@ export default function SubmitReview() {
                   <Label htmlFor="title">Media Title</Label>
                   <Input
                     id="title"
-                    placeholder="Enter movie, show, game, or book title"
+                    placeholder="Enter movie, show, book, or song title"
                     value={formData.title}
                     onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                     required
