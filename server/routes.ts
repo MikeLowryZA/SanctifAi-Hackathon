@@ -19,6 +19,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Setup authentication (Replit Auth integration)
   await setupAuth(app);
 
+  // Health check endpoint - for monitoring and deployment verification
+  app.get("/health", (_req, res) => {
+    return res.json({
+      status: "ok",
+      hasOpenAI: !!config.openaiApiKey,
+      hasTMDB: !!config.tmdbApiKey,
+    });
+  });
+
   // Auth route - get current user (guest mode for hackathon)
   app.get("/api/auth/user", (_req, res) => {
     return res.json({
