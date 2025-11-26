@@ -60,10 +60,13 @@ export default function Home() {
       return;
     }
     
-    // Songs use iTunes search
+    // Songs go directly to results page where iTunes search happens
     if (finalMediaType === "song") {
-      setIsSearching(true);
-      setSearchQuery({ title, mediaType: finalMediaType });
+      const params = new URLSearchParams({
+        title,
+        mediaType: finalMediaType,
+      });
+      setLocation(`/results?${params.toString()}`);
       return;
     }
     
@@ -73,24 +76,7 @@ export default function Home() {
   };
 
   const handleMediaSelect = (result: any) => {
-    // Handle song selection differently
-    if (searchQuery?.mediaType === "song") {
-      const params = new URLSearchParams({ 
-        title: result.title,
-        artist: result.artist,
-        mediaType: "song",
-      });
-      if (result.artwork) params.append("artwork", result.artwork);
-      if (result.album) params.append("album", result.album);
-      if (result.releaseYear) params.append("releaseYear", result.releaseYear);
-      
-      setLocation(`/results?${params.toString()}`);
-      setIsSearching(false);
-      setSearchQuery(null);
-      return;
-    }
-    
-    // Handle other media types (movie, show, game)
+    // Handle media selection (movies, shows, games)
     const params = new URLSearchParams({ 
       title: result.title,
       mediaType: result.mediaType,

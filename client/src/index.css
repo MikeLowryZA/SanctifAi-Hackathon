@@ -326,4 +326,14 @@
   .border.hover-elevate:not(.no-hover-interaction-elevate)::after {
     inset: -1px;
   }
+
+  /* Custom hover scale effect for song cards */
+  .hover\:scale-102:hover {
+    transform: scale(1.02);
+  }
+
+  /* Smooth scroll offset for anchor navigation */
+  .scroll-mt-8 {
+    scroll-margin-top: 2rem;
+  }
 }

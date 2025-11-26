@@ -42,8 +42,12 @@ export function SongAnalysis({ title, artist, artwork, album }: SongAnalysisProp
   const [showLyricsInput, setShowLyricsInput] = useState(false);
   const [manualLyrics, setManualLyrics] = useState("");
 
+  // Only fetch if we have both title and artist
+  const shouldFetch = !!title && !!artist;
+
   const { data, isLoading, error } = useQuery<LyricsAnalysisResult>({
     queryKey: ["/api/analyze/lyrics", artist, title],
+    enabled: shouldFetch,
     queryFn: async () => {
       const response = await fetch("/api/analyze/lyrics", {
         method: "POST",
@@ -118,9 +122,8 @@ export function SongAnalysis({ title, artist, artwork, album }: SongAnalysisProp
     );
   }
 
-  if (!data) return null;
-
-  if (!data.lyricsAvailable || showLyricsInput) {
+  // Show manual input if no artist or no data fetched
+  if (!shouldFetch || !data || !data.lyricsAvailable || showLyricsInput) {
     return (
       <div className="space-y-6">
         {artwork && (
@@ -143,7 +146,9 @@ export function SongAnalysis({ title, artist, artwork, album }: SongAnalysisProp
           </CardHeader>
           <CardContent className="space-y-4">
             <p className="text-sm text-muted-foreground">
-              {data.message || "Lyrics not found automatically. Paste the lyrics below to analyze."}
+              {!shouldFetch
+                ? "Please paste the song lyrics below to analyze."
+                : data?.message || "Lyrics not found automatically. Paste the lyrics below to analyze."}
             </p>
             <Textarea
               placeholder="Paste song lyrics here..."
