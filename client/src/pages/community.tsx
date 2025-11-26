@@ -1,7 +1,8 @@
 import { motion } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Users, MessageCircle, Star, MessageSquare, Bell, Construction } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Users, MessageCircle, Star, MessageSquare, Bell, Construction, Gamepad2, Sparkles } from "lucide-react";
 import { useLocation } from "wouter";
 
 export default function Community() {
@@ -56,11 +57,58 @@ export default function Community() {
           </p>
         </motion.div>
 
-        {/* Coming Soon Banner */}
+        {/* New Feature Announcement - Games & Apps */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
+        >
+          <Card className="rounded-2xl border-2 bg-gradient-to-br from-primary/10 via-primary/5 to-background relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
+            <CardContent className="pt-8 pb-8 relative z-10">
+              <div className="flex flex-col md:flex-row items-center gap-6">
+                <div className="flex items-center justify-center w-20 h-20 rounded-2xl bg-gradient-to-br from-primary to-primary/80 flex-shrink-0 shadow-lg">
+                  <Gamepad2 className="w-10 h-10 text-white" />
+                </div>
+                <div className="flex-1 text-center md:text-left space-y-3">
+                  <div className="flex items-center gap-3 justify-center md:justify-start flex-wrap">
+                    <h2 className="text-2xl md:text-3xl font-heading font-bold">
+                      Game & App Discernment
+                    </h2>
+                    <Badge className="bg-primary text-primary-foreground border-0 gap-1 px-3 py-1">
+                      <Sparkles className="w-3 h-3" />
+                      Coming Soon
+                    </Badge>
+                  </div>
+                  <p className="text-base md:text-lg text-muted-foreground leading-relaxed">
+                    Exciting news! We're expanding our faith-based analysis to include video games and mobile apps.
+                    Get discernment scores, biblical insights, and age-appropriate recommendations for the digital entertainment your family enjoys.
+                  </p>
+                  <div className="flex flex-wrap gap-2 justify-center md:justify-start pt-2">
+                    <Badge variant="secondary" className="text-xs">
+                      Video Games
+                    </Badge>
+                    <Badge variant="secondary" className="text-xs">
+                      Mobile Apps
+                    </Badge>
+                    <Badge variant="secondary" className="text-xs">
+                      Biblical Analysis
+                    </Badge>
+                    <Badge variant="secondary" className="text-xs">
+                      Age Ratings
+                    </Badge>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
+
+        {/* Community Development Banner */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
         >
           <Card className="rounded-2xl border-2 bg-primary/5">
             <CardContent className="pt-8 pb-8">
@@ -73,7 +121,7 @@ export default function Community() {
                     Under Development
                   </h2>
                   <p className="text-muted-foreground">
-                    We're building powerful community features to help believers connect and share their faith-based media insights. 
+                    We're building powerful community features to help believers connect and share their faith-based media insights.
                     Stay tuned for updates!
                   </p>
                 </div>
@@ -89,7 +137,7 @@ export default function Community() {
               key={index}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.3, delay: 0.2 + index * 0.1 }}
+              transition={{ duration: 0.3, delay: 0.3 + index * 0.1 }}
             >
               <Card className="rounded-2xl border-2 h-full" data-testid={`card-feature-${index}`}>
                 <CardHeader>
@@ -123,7 +171,7 @@ export default function Community() {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.6 }}
+          transition={{ delay: 0.7 }}
           className="text-center space-y-6 py-12"
         >
           <div className="space-y-4 max-w-2xl mx-auto">
@@ -131,7 +179,7 @@ export default function Community() {
               Meanwhile, explore our current features
             </h2>
             <p className="text-muted-foreground">
-              Search for movies, shows, games, and books to receive faith-based discernment analysis
+              Search for movies, shows, songs, and books to receive faith-based discernment analysis
             </p>
           </div>
           <div className="flex gap-4 justify-center">
