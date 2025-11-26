@@ -76,11 +76,6 @@ In "faithAnalysis":
 function getOpenAIClient(): OpenAI | null {
   const apiKey = config.openaiApiKey;
 
-  console.log("[OpenAI] getOpenAIClient env check:", {
-    hasOpenAI: !!apiKey,
-    preview: apiKey ? apiKey.slice(0, 6) + "..." : null,
-  });
-
   if (!apiKey) {
     return null;
   }
@@ -133,13 +128,11 @@ export async function analyzeMedia(
     const raw =
       completion.choices[0]?.message?.content?.trim() ?? "";
 
-    console.log("[OpenAI] Raw JSON response:", raw.slice(0, 300));
-
     let parsed: any;
     try {
       parsed = JSON.parse(raw);
     } catch (err) {
-      console.error("[OpenAI] Failed to parse JSON. Raw content:", raw);
+      console.error("[OpenAI] Failed to parse JSON response");
       throw new Error("Failed to parse OpenAI JSON response");
     }
 

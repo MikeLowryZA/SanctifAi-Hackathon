@@ -241,17 +241,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       if (cached) {
-        console.log(`✅ Returning cached analysis for "${title}" (tmdbId: ${tmdbId || 'none'})`);
-        
         // Auto-save cached analysis to user's library if authenticated
         if ((req as any).user?.claims?.sub) {
           try {
             const userId = (req as any).user.claims.sub;
             await storage.saveAnalysis(userId, cached.id);
-            console.log(`✅ Auto-saved cached analysis "${cached.title}" to user ${userId}'s library`);
           } catch (saveError) {
             console.error("Failed to auto-save cached analysis to library:", saveError);
-            // Don't fail the request if auto-save fails
           }
         }
         
@@ -266,10 +262,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // For books, fetch Google Books metadata
       if (mediaType === "book") {
-        console.log(`📚 Fetching Google Books data for "${title}"...`);
         const bookInfo = await fetchBookInfo(title);
         if (bookInfo) {
-          console.log(`✅ Found book info: ${bookInfo.title} by ${bookInfo.authors}`);
           finalPosterUrl = bookInfo.imageUrl || finalPosterUrl;
           finalGenre = bookInfo.genre || null;
 
@@ -288,8 +282,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
             const yearMatch = bookInfo.publishedDate.match(/\d{4}/);
             finalReleaseYear = yearMatch ? yearMatch[0] : null;
           }
-        } else {
-          console.log(`⚠️ No Google Books data found for "${title}"`);
         }
       }
       
@@ -335,10 +327,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         try {
           const userId = (req as any).user.claims.sub;
           await storage.saveAnalysis(userId, saved.id);
-          console.log(`✅ Auto-saved analysis "${saved.title}" to user ${userId}'s library`);
         } catch (saveError) {
           console.error("Failed to auto-save analysis to library:", saveError);
-          // Don't fail the request if auto-save fails
         }
       }
 
@@ -400,8 +390,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/log-search", async (req, res) => {
     try {
       // This endpoint receives webhook data from Make.com
-      // For now, just acknowledge receipt
-      console.log("Received Make.com webhook:", req.body);
       res.json({ success: true, message: "Webhook received" });
     } catch (error) {
       console.error("Webhook error:", error);

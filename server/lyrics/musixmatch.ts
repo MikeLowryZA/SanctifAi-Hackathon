@@ -29,7 +29,6 @@ export class MusixmatchProvider implements LyricsProvider {
 
       const track = searchData.message?.body?.track_list?.[0]?.track;
       if (!track) {
-        console.log(`No Musixmatch track found for: ${artist} - ${title}`);
         return null;
       }
 
@@ -47,7 +46,6 @@ export class MusixmatchProvider implements LyricsProvider {
 
       const lyricsBody = lyricsData.message?.body?.lyrics?.lyrics_body;
       if (!lyricsBody) {
-        console.log(`No lyrics available for track ID: ${trackId}`);
         return null;
       }
 

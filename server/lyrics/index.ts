@@ -84,8 +84,6 @@ export async function createLyricsCacheTable(sql: any): Promise<void> {
     
     await sql`CREATE INDEX IF NOT EXISTS idx_lyrics_cache_key ON lyrics_cache(cache_key)`;
     await sql`CREATE INDEX IF NOT EXISTS idx_lyrics_cached_at ON lyrics_cache(cached_at)`;
-    
-    console.log('✅ Lyrics cache table ready');
   } catch (error) {
     console.error('Failed to create lyrics_cache table:', error);
   }

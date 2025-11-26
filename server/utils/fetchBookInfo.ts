@@ -24,7 +24,6 @@ export async function fetchBookInfo(title: string): Promise<BookInfo | null> {
     const data = await res.json();
     
     if (!data.items?.length) {
-      console.log(`No books found for title: ${title}`);
       return null;
     }
 

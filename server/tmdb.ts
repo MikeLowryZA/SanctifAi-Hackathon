@@ -30,13 +30,7 @@ const TMDB_IMAGE_BASE_URL = "https://image.tmdb.org/t/p/w500";
  * Returns null when API key is not available.
  */
 function getTMDBApiKey(): string | null {
-  const apiKey = config.tmdbApiKey;
-  console.log("[TMDB] getTMDBApiKey env check:", {
-    hasTMDB: !!apiKey,
-    preview: apiKey ? apiKey.slice(0, 6) + "..." : null,
-  });
-
-  return apiKey;
+  return config.tmdbApiKey;
 }
 
 /**
