@@ -39,7 +39,7 @@ export function SearchBar({ onSearch, isLoading = false }: SearchBarProps) {
     if (isSongSelected) {
       return "Enter song title...";
     }
-    return "Enter a movie, show, game, song, or book title...";
+    return "Enter a movie, show, song, or book title...";
   };
 
   return (
