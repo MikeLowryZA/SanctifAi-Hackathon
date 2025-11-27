@@ -12,6 +12,7 @@ import { searchiTunes } from "./utils/fetchMusicInfo";
 import { neon } from "@neondatabase/serverless";
 import { LyricsCache } from "./lyrics/index";
 import { MusixmatchProvider } from "./lyrics/musixmatch";
+import { LyricsOvhProvider } from "./lyrics/lyricsovh";
 import { ManualProvider } from "./lyrics/manual";
 import { config } from "./config";
 
@@ -81,6 +82,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
           lyricsAvailable = true;
           if (cache) {
             await cache.set(artist, title, lyrics, provider);
+          }
+        }
+        // Try Lyrics.ovh (free, no API key required)
+        else if (config.lyricsProvider === 'lyricsovh') {
+          const lyricsovh = new LyricsOvhProvider();
+          const result = await lyricsovh.search(artist, title);
+
+          if (result) {
+            lyrics = result.lyrics;
+            provider = result.provider;
+            lyricsAvailable = true;
+            if (cache) {
+              await cache.set(artist, title, lyrics, provider);
+            }
           }
         }
         // Try Musixmatch if API key is configured
