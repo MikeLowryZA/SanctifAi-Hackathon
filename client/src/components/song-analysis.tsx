@@ -126,6 +126,13 @@ export function SongAnalysis({ title, artist, artwork, album }: SongAnalysisProp
   if (!shouldFetch || !data || !data.lyricsAvailable || showLyricsInput) {
     return (
       <div className="space-y-6">
+        {/* Page Heading */}
+        <div className="text-center space-y-2">
+          <h1 className="text-3xl md:text-4xl font-heading font-bold">
+            Analyze a Song with Lyrics
+          </h1>
+        </div>
+
         {artwork && (
           <div className="flex items-center gap-4">
             <img src={artwork} alt={title} className="w-24 h-24 rounded-md shadow-lg" />
@@ -157,6 +164,9 @@ export function SongAnalysis({ title, artist, artwork, album }: SongAnalysisProp
               className="min-h-[300px] font-mono text-sm"
               data-testid="textarea-manual-lyrics"
             />
+            <p className="text-sm text-muted-foreground">
+              Paste the lyrics (or most important verses) of the song. SanctifAi will evaluate themes and spiritual alignment based on this text.
+            </p>
             <div className="flex gap-2">
               <Button
                 onClick={handleAnalyzeManualLyrics}

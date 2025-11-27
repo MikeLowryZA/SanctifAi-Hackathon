@@ -42,6 +42,20 @@ export function SearchBar({ onSearch, isLoading = false }: SearchBarProps) {
     return "Enter a movie, show, song, or book title...";
   };
 
+  const getButtonText = () => {
+    if (isSongSelected) {
+      return "Continue to lyrics";
+    }
+    return "Search with Discernment";
+  };
+
+  const getHelperText = () => {
+    if (isSongSelected) {
+      return "For songs, SanctifAi currently analyzes content based on lyrics you provide.";
+    }
+    return null;
+  };
+
   return (
     <form onSubmit={handleSubmit} className="w-full">
       <div className="flex flex-col gap-4">
@@ -94,9 +108,16 @@ export function SearchBar({ onSearch, isLoading = false }: SearchBarProps) {
             disabled={!title.trim() || isLoading}
             data-testid="button-search"
           >
-            {isLoading ? "Seeking wisdom..." : "Search with Discernment"}
+            {isLoading ? "Seeking wisdom..." : getButtonText()}
           </Button>
         </div>
+
+        {/* Helper text for song workflow */}
+        {getHelperText() && (
+          <p className="text-sm text-muted-foreground text-center mt-2">
+            {getHelperText()}
+          </p>
+        )}
 
         {/* Conditional Artist Field - Shows when Song is selected */}
         {isSongSelected && (
