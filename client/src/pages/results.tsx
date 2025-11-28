@@ -10,7 +10,7 @@ import { VerseCard } from "@/components/verse-card";
 import { AlternativesList } from "@/components/alternatives-list";
 import { SaveButton } from "@/components/save-button";
 import { SongAnalysis } from "@/components/song-analysis";
-import { ArrowLeft, Star, Film, AlertTriangle, Loader2, Music, Check } from "lucide-react";
+import { ArrowLeft, Star, Film, AlertTriangle, Loader2 } from "lucide-react";
 import type { SearchResponse } from "@shared/schema";
 
 interface SongResult {
@@ -38,38 +38,26 @@ export default function Results() {
   const artwork = searchParams.get("artwork") || undefined;
   const album = searchParams.get("album") || undefined;
 
-  // State for song selection on Results page
-  const [selectedSong, setSelectedSong] = useState<SongResult | null>(
-    // If artist is in URL params, treat it as a pre-selected song
-    artist ? {
-      id: 0,
-      title,
-      artist,
-      artwork,
-      album,
-      releaseYear
-    } : null
-  );
 
-  // Fetch song search results using backend /api/search endpoint
-  const { data: songSearchData, isLoading: isLoadingSongSearch } = useQuery<{ results: SongResult[] }>({
-    queryKey: ["/api/tmdb/search", title, mediaType, artist],
-    enabled: mediaType === "song",
-    queryFn: async () => {
-      const params = new URLSearchParams({
-        query: title,
-        mediaType: "song"
-      });
-      if (artist) {
-        params.append("artist", artist);
-      }
-      const response = await fetch(`/api/tmdb/search?${params.toString()}`);
-      if (!response.ok) {
-        throw new Error("Failed to search songs");
-      }
-      return response.json();
-    },
-  });
+  // iTunes search functionality preserved for future use but disabled
+  // const { data: songSearchData, isLoading: isLoadingSongSearch } = useQuery<{ results: SongResult[] }>({
+  //   queryKey: ["/api/tmdb/search", title, mediaType, artist],
+  //   enabled: false, // Disabled for simplified lyrics-only flow
+  //   queryFn: async () => {
+  //     const params = new URLSearchParams({
+  //       query: title,
+  //       mediaType: "song"
+  //     });
+  //     if (artist) {
+  //       params.append("artist", artist);
+  //     }
+  //     const response = await fetch(`/api/tmdb/search?${params.toString()}`);
+  //     if (!response.ok) {
+  //       throw new Error("Failed to search songs");
+  //     }
+  //     return response.json();
+  //   },
+  // });
 
   const { data, isLoading, error } = useQuery<SearchResponse>({
     queryKey: ["/api/search", title, mediaType, tmdbId],
@@ -97,17 +85,6 @@ export default function Results() {
     },
   });
 
-  // Handle song selection from iTunes results
-  const handleSongSelect = (song: SongResult) => {
-    setSelectedSong(song);
-    // Scroll to analysis section smoothly
-    setTimeout(() => {
-      document.getElementById("song-analysis")?.scrollIntoView({
-        behavior: "smooth",
-        block: "start"
-      });
-    }, 100);
-  };
 
   if (!title) {
     return (
@@ -120,7 +97,7 @@ export default function Results() {
     );
   }
 
-  // Handle song search and analysis flow
+  // Simplified song analysis flow - lyrics-based only
   if (mediaType === "song") {
     return (
       <div className="min-h-[calc(100vh-4rem)]">
@@ -135,143 +112,21 @@ export default function Results() {
             Back to Search
           </Button>
 
-          {/* STEP 1: Song Selection */}
+          {/* Song Lyrics Analysis */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
           >
-            <div className="flex items-center gap-3 mb-6">
-              <div className="flex items-center justify-center w-10 h-10 rounded-full bg-primary/10 text-primary font-bold">
-                1
-              </div>
-              <h2 className="text-2xl font-heading font-bold">
-                {selectedSong ? "Selected Song" : "Select Your Song"}
-              </h2>
-            </div>
+            <h2 className="text-3xl font-heading font-bold mb-6">Analyze Lyrics</h2>
 
-            {isLoadingSongSearch ? (
-              <div className="flex flex-col items-center justify-center py-20 space-y-4">
-                <Loader2 className="w-12 h-12 text-primary animate-spin" />
-                <p className="text-muted-foreground">Searching iTunes...</p>
-              </div>
-            ) : !isLoadingSongSearch && songSearchData && songSearchData.results && songSearchData.results.length === 0 ? (
-              <Card className="border-2 border-muted">
-                <CardContent className="pt-8 pb-8 text-center space-y-4">
-                  <Music className="w-12 h-12 text-muted-foreground mx-auto" />
-                  <div>
-                    <h3 className="text-lg font-semibold mb-2">No songs found for this title</h3>
-                    <p className="text-muted-foreground">
-                      You can still paste lyrics below to get a biblical discernment.
-                    </p>
-                  </div>
-                </CardContent>
-              </Card>
-            ) : songSearchData?.results && songSearchData.results.length > 0 ? (
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-                {songSearchData.results.map((song) => (
-                  <Card
-                    key={song.id}
-                    className={`cursor-pointer transition-all ${
-                      selectedSong?.id === song.id
-                        ? "ring-2 ring-primary shadow-lg scale-105"
-                        : "hover:shadow-md hover:scale-102"
-                    }`}
-                    onClick={() => handleSongSelect(song)}
-                    data-testid={`song-option-${song.id}`}
-                  >
-                    <CardContent className="p-0">
-                      <div className="aspect-square relative bg-muted">
-                        {song.artwork ? (
-                          <img
-                            src={song.artwork}
-                            alt={song.title}
-                            className="w-full h-full object-cover rounded-t-md"
-                          />
-                        ) : (
-                          <div className="w-full h-full flex items-center justify-center">
-                            <Music className="w-8 h-8 text-muted-foreground" />
-                          </div>
-                        )}
-                        {selectedSong?.id === song.id && (
-                          <div className="absolute top-2 right-2 bg-primary text-primary-foreground rounded-full p-1">
-                            <Check className="w-4 h-4" />
-                          </div>
-                        )}
-                      </div>
-                      <div className="p-3">
-                        <h3 className="font-semibold text-sm line-clamp-2 mb-1">
-                          {song.title}
-                        </h3>
-                        <p className="text-xs text-muted-foreground line-clamp-1 mb-2">
-                          {song.artist}
-                        </p>
-                        {song.album && (
-                          <p className="text-xs text-muted-foreground line-clamp-1 mb-1">
-                            {song.album}
-                          </p>
-                        )}
-                        {song.releaseYear && (
-                          <Badge variant="secondary" className="text-xs">
-                            {song.releaseYear}
-                          </Badge>
-                        )}
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            ) : null}
+            <SongAnalysis
+              title={title}
+              artist={artist || ""}
+              artwork={artwork}
+              album={album}
+            />
           </motion.div>
-
-          {/* STEP 2: Song Analysis */}
-          {selectedSong && (
-            <motion.div
-              id="song-analysis"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.2 }}
-              className="scroll-mt-8"
-            >
-              <div className="flex items-center gap-3 mb-6">
-                <div className="flex items-center justify-center w-10 h-10 rounded-full bg-primary/10 text-primary font-bold">
-                  2
-                </div>
-                <h2 className="text-2xl font-heading font-bold">Analyze Lyrics</h2>
-              </div>
-
-              <SongAnalysis
-                title={selectedSong.title}
-                artist={selectedSong.artist}
-                artwork={selectedSong.artwork}
-                album={selectedSong.album}
-              />
-            </motion.div>
-          )}
-
-          {/* Fallback: Show analysis input when no song is selected */}
-          {!selectedSong && !isLoadingSongSearch && (
-            <motion.div
-              id="song-analysis"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.2 }}
-            >
-              <div className="flex items-center gap-3 mb-6">
-                <div className="flex items-center justify-center w-10 h-10 rounded-full bg-primary/10 text-primary font-bold">
-                  2
-                </div>
-                <h2 className="text-2xl font-heading font-bold">Analyze Lyrics</h2>
-              </div>
-
-              <SongAnalysis
-                title={title}
-                artist={artist || ""}
-                artwork={undefined}
-                album={undefined}
-              />
-            </motion.div>
-          )}
         </div>
       </div>
     );
