@@ -51,7 +51,7 @@ export function SearchBar({ onSearch, isLoading = false }: SearchBarProps) {
 
   const getHelperText = () => {
     if (isSongSelected) {
-      return "For songs, SanctifAi currently analyzes content based on lyrics you provide.";
+      return "For songs, SanctifAi analyzes lyrics. We'll auto-fetch them when possible, or you can paste them manually.";
     }
     return null;
   };

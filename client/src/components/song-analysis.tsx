@@ -154,8 +154,8 @@ export function SongAnalysis({ title, artist, artwork, album }: SongAnalysisProp
           <CardContent className="space-y-4">
             <p className="text-sm text-muted-foreground">
               {!shouldFetch
-                ? "Please paste the song lyrics below to analyze."
-                : data?.message || "Lyrics not found automatically. Paste the lyrics below to analyze."}
+                ? "If we couldn't automatically find lyrics for this song, paste them below to continue the analysis."
+                : data?.message || "If we couldn't automatically find lyrics for this song, paste them below to continue the analysis."}
             </p>
             <Textarea
               placeholder="Paste song lyrics here..."
