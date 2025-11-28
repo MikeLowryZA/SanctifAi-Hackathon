@@ -151,7 +151,7 @@ export function scoreFromSignals(
     violence: !!signals.explicit?.violence?.length,
     occult: !!signals.explicit?.occult?.length,
     substances: !!(signals as any).explicit?.substances?.length,
-    blasphemy: !!(signals as any).explicit?.blasphemy?.length,
+    blasphemy: !!(signals as any).blasphemy?.length,
     selfharm: !!(signals as any).selfharm?.length,
     theme: (id: string) => signals.themes?.includes(id),
     claim: (needle: string) => signals.claims?.some((c) => c.includes(needle)),
