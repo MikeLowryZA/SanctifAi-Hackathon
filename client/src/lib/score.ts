@@ -1,11 +1,5 @@
-export interface Rule {
-  id: string;
-  title: string;
-  description: string;
-  category: string;
-  weight: number;
-  anchors: string[];
-}
+import type { Rule } from "@/lib/lexicons/rules";
+import type { ExtractedSignals } from "@/lib/extract";
 
 export interface Signals {
   themes: string[];
@@ -14,15 +8,24 @@ export interface Signals {
     sexual?: string[];
     violence?: string[];
     occult?: string[];
-    substances?: string[];
   };
-  blasphemy?: string[];
-  selfharm?: string[];
-  claims?: string[];
-  bibleRefs?: string[];
+  claims: string[];
+  bibleRefs: string[];
 }
 
-export interface ScoreResult {
+type Hit = {
+  ruleId: string;
+  weight: number;
+  refs: string[];
+  reason?: string;
+};
+
+export type ScoreResult = {
+  total: number;
+  hits: Hit[];
+};
+
+export interface ScoreResultOld {
   total: number;
   subscores: Record<string, number>;
   hits: Array<{
@@ -32,7 +35,7 @@ export interface ScoreResult {
   }>;
 }
 
-export function scoreFromSignals(signals: Signals, rules: Rule[]): ScoreResult {
+export function scoreFromSignals_old(signals: Signals, rules: Rule[]): ScoreResultOld {
   const subscores: Record<string, number> = {};
   const hits: Array<{ ruleId: string; refs: string[]; reason?: string }> = [];
 
@@ -43,84 +46,10 @@ export function scoreFromSignals(signals: Signals, rules: Rule[]): ScoreResult {
     let matched = false;
     let reason = "";
 
-    // Lyrics-specific rules
-    if (rule.id === "explicit-language") {
-      const profanity = signals.explicit.language || [];
-      if (profanity.length > 0) {
-        ruleScore = rule.weight;
-        matched = true;
-        reason = `Profanity detected: ${profanity.slice(0, 3).join(", ")}${profanity.length > 3 ? "..." : ""}`;
-      }
-    }
-
-    if (rule.id === "explicit-sexual") {
-      const sexual = signals.explicit.sexual || [];
-      if (sexual.length > 0) {
-        ruleScore = rule.weight;
-        matched = true;
-        reason = `Sexual content: ${sexual.slice(0, 3).join(", ")}${sexual.length > 3 ? "..." : ""}`;
-      }
-    }
-
-    if (rule.id === "explicit-violence") {
-      const violence = signals.explicit.violence || [];
-      if (violence.length > 0) {
-        ruleScore = rule.weight;
-        matched = true;
-        reason = `Violence glorification: ${violence.slice(0, 3).join(", ")}${violence.length > 3 ? "..." : ""}`;
-      }
-    }
-
-    if (rule.id === "substance-abuse") {
-      const substances = signals.explicit.substances || [];
-      if (substances.length > 0) {
-        ruleScore = rule.weight;
-        matched = true;
-        reason = `Substance references: ${substances.slice(0, 3).join(", ")}${substances.length > 3 ? "..." : ""}`;
-      }
-    }
-
-    if (rule.id === "blasphemy") {
-      const blasphemy = signals.blasphemy || [];
-      if (blasphemy.length > 0) {
-        ruleScore = rule.weight;
-        matched = true;
-        reason = `Irreverent use of God's name: ${blasphemy.slice(0, 3).join(", ")}${blasphemy.length > 3 ? "..." : ""}`;
-      }
-    }
-
-    if (rule.id === "self-harm") {
-      const selfharm = signals.selfharm || [];
-      if (selfharm.length > 0) {
-        ruleScore = rule.weight;
-        matched = true;
-        reason = `Self-harm themes: ${selfharm.slice(0, 3).join(", ")}${selfharm.length > 3 ? "..." : ""}`;
-      }
-    }
-
-    if (rule.id === "worship") {
-      const hasWorship = signals.themes.includes("worship");
-      if (hasWorship) {
-        ruleScore = rule.weight;
-        matched = true;
-        reason = "Direct worship and praise of God";
-      }
-    }
-
-    if (rule.id === "repentance-hope") {
-      const hasRepentance = signals.themes.includes("repentance-hope");
-      if (hasRepentance) {
-        ruleScore = rule.weight;
-        matched = true;
-        reason = "Themes of repentance and hope in Christ";
-      }
-    }
-
-    // Movie/show/book rules (backward compatibility)
     if (rule.id === "occult-practices") {
       const occultKeywords = signals.explicit.occult || [];
       if (occultKeywords.length > 0) {
-        ruleScore = rule.weight;
+        ruleScore = -rule.weight;
         matched = true;
         reason = `Occult elements: ${occultKeywords.join(", ")}`;
       }
@@ -129,7 +58,7 @@ export function scoreFromSignals(signals: Signals, rules: Rule[]): ScoreResult {
     if (rule.id === "sexual-purity") {
       const sexualContent = signals.explicit.sexual || [];
       if (sexualContent.length > 0) {
-        ruleScore = rule.weight;
+        ruleScore = -rule.weight;
         matched = true;
         reason = `Sexual content: ${sexualContent.join(", ")}`;
       }
@@ -141,7 +70,7 @@ export function scoreFromSignals(signals: Signals, rules: Rule[]): ScoreResult {
         violence.length > 0 &&
         violence.some((v) => v.includes("graphic") || v.includes("extreme"))
       ) {
-        ruleScore = rule.weight;
+        ruleScore = -rule.weight;
         matched = true;
         reason = `Extreme violence detected`;
       }
@@ -163,17 +92,16 @@ export function scoreFromSignals(signals: Signals, rules: Rule[]): ScoreResult {
     }
 
     if (rule.id === "false-gospel" || rule.id === "deity-of-christ") {
-      const problematicClaims = signals.claims || [];
-      const filteredClaims = problematicClaims.filter(
+      const problematicClaims = signals.claims.filter(
         (c) =>
           c.toLowerCase().includes("all paths lead to god") ||
           c.toLowerCase().includes("works-based salvation") ||
           c.toLowerCase().includes("jesus is just a teacher"),
       );
-      if (filteredClaims.length > 0) {
-        ruleScore = rule.weight;
+      if (problematicClaims.length > 0) {
+        ruleScore = -rule.weight;
         matched = true;
-        reason = `Theological concern: ${filteredClaims[0]}`;
+        reason = `Theological concern: ${problematicClaims[0]}`;
       }
     }
 
@@ -191,4 +119,78 @@ export function scoreFromSignals(signals: Signals, rules: Rule[]): ScoreResult {
   total = Math.max(0, Math.min(100, total));
 
   return { total, subscores, hits };
+}
+
+const clamp = (n: number, lo = 0, hi = 100) => Math.max(lo, Math.min(hi, n));
+
+// Optional human reasons for the UI (add as you like)
+const REASONS: Record<string, string> = {
+  "explicit-language": "Detected profanity / coarse talk.",
+  "explicit-sexual": "Detected sexualized terms / objectification.",
+  "explicit-violence": "Detected violent / graphic terms.",
+  "substance-abuse": "Detected intoxication / drug abuse terms.",
+  "occult-practices": "Detected witchcraft/divination/demonic references.",
+  blasphemy: "Detected irreverent/profane use of God's name or of Christ.",
+  "self-harm": "Detected self-harm / suicide language.",
+  "false-gospel": "Detected contradictions to salvation by grace.",
+  "idolatry-materialism": "Detected idolatry/greed as ultimate good.",
+  worship: "Detected worship/reverence toward God.",
+  "repentance-hope": "Detected repentance/hope centered on Christ.",
+  // keep/add doctrinal rules you already have:
+  "salvation-by-grace": "Affirms salvation by grace alone.",
+  "deity-of-christ": "Affirms Jesus' full deity.",
+};
+
+export function scoreFromSignals(
+  signals: ExtractedSignals,
+  rules: Rule[],
+): ScoreResult {
+  const has = {
+    lang: !!signals.explicit?.language?.length,
+    sexual: !!signals.explicit?.sexual?.length,
+    violence: !!signals.explicit?.violence?.length,
+    occult: !!signals.explicit?.occult?.length,
+    substances: !!(signals as any).explicit?.substances?.length,
+    blasphemy: !!(signals as any).explicit?.blasphemy?.length,
+    selfharm: !!(signals as any).selfharm?.length,
+    theme: (id: string) => signals.themes?.includes(id),
+    claim: (needle: string) => signals.claims?.some((c) => c.includes(needle)),
+  };
+
+  const match: Record<string, boolean> = {
+    "explicit-language": has.lang,
+    "explicit-sexual": has.sexual,
+    "explicit-violence": has.violence,
+    "substance-abuse": has.substances,
+    "occult-practices": has.occult,
+    blasphemy: has.blasphemy,
+    "self-harm": has.selfharm,
+    "false-gospel":
+      has.claim("works-based salvation") || has.claim("all paths lead to god"),
+    "idolatry-materialism":
+      has.claim("idolatry") ||
+      has.theme("idolatry") ||
+      has.theme("materialism"),
+    worship: has.theme("worship"),
+    "repentance-hope": has.theme("repentance-hope"),
+    "salvation-by-grace":
+      has.claim("salvation by grace") || has.theme("grace"),
+    "deity-of-christ":
+      has.claim("deity of christ") || has.theme("christ deity"),
+  };
+
+  const hits: Hit[] = [];
+  for (const r of rules) {
+    if (match[r.id]) {
+      hits.push({
+        ruleId: r.id,
+        weight: r.weight,
+        refs: r.anchors,
+        reason: REASONS[r.id],
+      });
+    }
+  }
+
+  const total = clamp(50 + hits.reduce((s, h) => s + h.weight, 0));
+  return { total, hits };
 }
