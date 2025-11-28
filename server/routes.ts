@@ -123,9 +123,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
-      // Load scripture analysis libs dynamically
+      // Load scripture + scoring libs dynamically
       const { extractLyricsSignals } = await import("../client/src/lib/extract.js");
-      const { scoreFromLyricsSignals, calibrateSongScore } = await import("../client/src/lib/score.js");
+      const { scoreFromSignals } = await import("../client/src/lib/score.js");
       const { getVerses } = await import("../client/src/lib/scripture.js");
 
       // Load rules from YAML
@@ -134,22 +134,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const rulesYaml = readFileSync("client/src/lib/rules.yaml", "utf8");
       const rules = parseYaml(rulesYaml);
 
-      // Extract lyrics-specific signals (profanity, sexual, violence, worship, etc.)
-      const lyricsSignals = extractLyricsSignals(lyrics);
+      // Extract lyric-specific signals from lyrics text
+      const signals = extractLyricsSignals(lyrics);
 
-      // Score based on lyrics signals and rules
-      const rawScoreResult = scoreFromLyricsSignals(lyricsSignals, rules);
+      // Score based on signals and rules
+      const score = scoreFromSignals(signals, rules);
 
-      // Apply calibration to ensure explicit songs score low and worship songs score high
-      const calibratedTotal = calibrateSongScore(rawScoreResult.total, rawScoreResult.hits);
-
-      // Create final score result with calibrated total
-      const score = {
-        ...rawScoreResult,
-        total: calibratedTotal,
-      };
-
-      // Fetch Bible verses for all unique anchors
+      // Fetch Bible verses for all referenced anchors
       const uniqueRefs = new Set<string>();
       score.hits.forEach((hit: any) => {
         hit.refs.forEach((ref: string) => uniqueRefs.add(ref));
@@ -157,16 +148,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const verses = await getVerses(Array.from(uniqueRefs), "WEB");
 
-      res.json({
-        meta: {
-          title,
-          artist,
-        },
+      return res.json({
+        meta: { title, artist },
         lyricsAvailable: true,
         provider,
-        cached: provider === 'cache',
+        cached: provider === "cache",
         analysis: {
-          signals: lyricsSignals,
+          signals,
           score,
           verses,
         },

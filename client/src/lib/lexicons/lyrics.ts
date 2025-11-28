@@ -1,10 +1,7 @@
 // client/src/lib/lexicons/lyrics.ts
-// Minimal, extensible regex-based lexicon for lyrics.
-// We normalize text first: lowercase, strip [chorus], compress whitespace, standardize quotes.
 
 const w = (s: string) => new RegExp(`\\b${s}\\b`, "i");
 
-// Allow separators for obfuscation (f*u!c?k, sh*t, etc.)
 const fuzz = (letters: string) =>
   new RegExp(
     letters
@@ -49,7 +46,7 @@ export const LYRICS_REGEX = {
     /\b(seance|divination|astrology|horoscope)\b/i,
   ],
   blasphemy: [
-    /\bjesus (christ|h christ)\b/i, // coarse interjection use
+    /\bjesus (christ|h christ)\b/i,
     /\bchrist almighty\b/i,
     /\b(jesus|christ|god)\s+(fucking|fuck|damn)\b/i,
   ],
@@ -70,9 +67,9 @@ export const LYRICS_REGEX = {
 export function normalizeLyrics(raw: string): string {
   return raw
     .toLowerCase()
-    .replace(/\[[^\]]+\]/g, " ") // remove [chorus], [verse], etc.
-    .replace(/[’‘]/g, "'")
-    .replace(/[“”]/g, '"')
+    .replace(/\[[^\]]+\]/g, " ")
+    .replace(/['']/g, "'")
+    .replace(/[""]/g, '"')
     .replace(/\s+/g, " ")
     .trim();
 }
