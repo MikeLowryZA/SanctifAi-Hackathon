@@ -27,9 +27,10 @@ export interface MusicSearchResult {
   duration?: string;
 }
 
-export async function searchiTunes(query: string): Promise<MusicSearchResult[]> {
+export async function searchiTunes(query: string, artist?: string): Promise<MusicSearchResult[]> {
   try {
-    const url = `https://itunes.apple.com/search?term=${encodeURIComponent(query)}&media=music&entity=song&limit=10`;
+    const searchQuery = artist ? `${query} ${artist}` : query;
+    const url = `https://itunes.apple.com/search?term=${encodeURIComponent(searchQuery)}&media=music&entity=song&limit=10`;
     const response = await fetch(url);
     
     if (!response.ok) {

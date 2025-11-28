@@ -57,46 +57,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const { artist, title, rawLyrics } = validation.data;
 
-      // Initialize cache if DATABASE_URL is set
-      let cache: LyricsCache | null = null;
-      if (process.env.DATABASE_URL) {
-        const sql = neon(process.env.DATABASE_URL);
-        cache = new LyricsCache(sql, 90);
-      }
+      // Initialize cache
+      const sql = neon(process.env.DATABASE_URL!);
+      const cache = new LyricsCache(sql, 90);
 
       // Check cache first
-      let lyrics: string | null = null;
+      let lyrics = await cache.get(artist, title);
       let provider = "cache";
-      let lyricsAvailable = false;
+      let lyricsAvailable = !!lyrics;
 
-      if (cache) {
-        lyrics = await cache.get(artist, title);
-        lyricsAvailable = !!lyrics;
-      }
-
-      // Try manual lyrics if provided
-      if (!lyrics && rawLyrics) {
-        lyrics = rawLyrics;
-        provider = "manual";
-        lyricsAvailable = true;
-        if (cache) {
+      if (!lyrics) {
+        // Try manual lyrics if provided
+        if (rawLyrics) {
+          lyrics = rawLyrics;
+          provider = "manual";
+          lyricsAvailable = true;
           await cache.set(artist, title, lyrics, provider);
         }
-      }
-      // Try Musixmatch if API key is configured
-      else if (
-        !lyrics &&
-        process.env.LYRICS_API_KEY &&
-        process.env.LYRICS_PROVIDER === "musixmatch"
-      ) {
-        const musixmatch = new MusixmatchProvider(process.env.LYRICS_API_KEY);
-        const result = await musixmatch.search(artist, title);
+        // Try Musixmatch if API key is configured
+        else if (process.env.LYRICS_API_KEY && process.env.LYRICS_PROVIDER === "musixmatch") {
+          const musixmatch = new MusixmatchProvider(process.env.LYRICS_API_KEY);
+          const result = await musixmatch.search(artist, title);
 
-        if (result) {
-          lyrics = result.lyrics;
-          provider = result.provider;
-          lyricsAvailable = true;
-          if (cache) {
+          if (result) {
+            lyrics = result.lyrics;
+            provider = result.provider;
+            lyricsAvailable = true;
             await cache.set(artist, title, lyrics, provider);
           }
         }
@@ -107,19 +93,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.json({
           meta: { title, artist },
           lyricsAvailable: false,
-          message:
-            "Lyrics not available. You can paste lyrics manually for analysis.",
+          message: "Lyrics not available. You can paste lyrics manually for analysis.",
         });
       }
 
-      // Load scripture + scoring libs dynamically
-      const { extractLyricsSignals } = await import(
-        "../client/src/lib/extract.js"
-      );
-      const { scoreFromSignals } = await import(
-        "../client/src/lib/score.js"
-      );
-      const { getVerses } = await import("./utils/scripture.js");
+      // Load analysis libs dynamically
+      const { extractSignals } = await import("../client/src/lib/extract.js");
+      const { scoreFromSignals } = await import("../client/src/lib/score.js");
+      const { getVerses } = await import("../client/src/lib/scripture.js");
 
       // Load rules from YAML
       const { readFileSync } = await import("fs");
@@ -127,13 +108,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const rulesYaml = readFileSync("client/src/lib/rules.yaml", "utf8");
       const rules = parseYaml(rulesYaml);
 
-      // Extract lyric-specific signals (profanity, sexual, etc.)
-      const signals = extractLyricsSignals(lyrics);
+      // Extract signals from lyrics
+      const signals = extractSignals(lyrics);
 
       // Score based on signals and rules
       const score = scoreFromSignals(signals, rules);
 
-      // Collect unique verse refs
+      // Fetch Bible verses for all unique anchors
       const uniqueRefs = new Set<string>();
       score.hits.forEach((hit: any) => {
         hit.refs.forEach((ref: string) => uniqueRefs.add(ref));
@@ -141,8 +122,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const verses = await getVerses(Array.from(uniqueRefs), "WEB");
 
-      return res.json({
-        meta: { title, artist },
+      res.json({
+        meta: {
+          title,
+          artist,
+        },
         lyricsAvailable: true,
         provider,
         cached: provider === "cache",
@@ -156,8 +140,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.error("Lyrics analysis error:", error);
       res.status(500).json({
         error: "Failed to analyze lyrics",
-        message:
-          error instanceof Error ? error.message : "Unknown error",
+        message: error instanceof Error ? error.message : "Unknown error",
       });
     }
   });
@@ -209,7 +192,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const schema = z.object({
         query: z.string().min(1),
-        mediaType: z.enum(["movie", "show", "book", "song"]).optional(),
+        mediaType: z.enum(["movie", "show", "game", "song"]).optional(),
         artist: z.string().optional(),
       });
 
@@ -225,16 +208,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Handle iTunes music search separately
       if (mediaType === "song") {
-        // Combine title and artist for better search results
-        const searchQuery = artist ? `${query} ${artist}` : query;
-        console.log('[iTunes Search Debug]', { mediaType, query, artist, searchQuery });
-        const results = await searchiTunes(searchQuery);
-        console.log('[iTunes Search Results]', { count: results.length });
+        const results = await searchiTunes(query, artist);
         return res.json({ results });
       }
-      
-      const results = await searchTMDB(query, mediaType);
 
+      // Filter out unsupported media types for TMDB
+      const tmdbMediaType = mediaType === "game" ? "movie" : mediaType;
+      const results = await searchTMDB(query, tmdbMediaType);
       res.json({ results });
     } catch (error) {
       console.error("TMDB search error:", error);
