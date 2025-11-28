@@ -97,8 +97,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
-      // Load analysis libs dynamically
-      const { extractSignals } = await import("../client/src/lib/extract.js");
+      // Load scripture analysis libs dynamically
+      const { extractLyricsSignals } = await import("../client/src/lib/extract.js");
       const { scoreFromSignals } = await import("../client/src/lib/score.js");
       const { getVerses } = await import("../client/src/lib/scripture.js");
 
@@ -108,10 +108,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const rulesYaml = readFileSync("client/src/lib/rules.yaml", "utf8");
       const rules = parseYaml(rulesYaml);
 
-      // Extract signals from lyrics
-      const signals = extractSignals(lyrics);
+      // Extract lyrics-specific signals (profanity, sexual content, worship, etc.)
+      const lyricsSignals = extractLyricsSignals(lyrics);
 
-      // Score based on signals and rules
+      // Adapt to the generic ExtractedSignals shape expected by scoreFromSignals
+      const signals: any = {
+        themes: lyricsSignals.themes,
+        explicit: {
+          language: lyricsSignals.explicit.language,
+          sexual: lyricsSignals.explicit.sexual,
+          violence: lyricsSignals.explicit.violence,
+          occult: lyricsSignals.explicit.occult,
+          substances: (lyricsSignals as any).explicit?.substances,
+        },
+        claims: [],
+        bibleRefs: [],
+        // pass through for blasphemy / self-harm rules
+        blasphemy: lyricsSignals.blasphemy,
+        selfharm: lyricsSignals.selfharm,
+      };
+
+      // Score based on lyrics signals and rules
       const score = scoreFromSignals(signals, rules);
 
       // Fetch Bible verses for all unique anchors
