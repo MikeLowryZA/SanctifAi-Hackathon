@@ -53,13 +53,16 @@ export default function Results() {
 
   // Fetch song search results using backend /api/search endpoint
   const { data: songSearchData, isLoading: isLoadingSongSearch } = useQuery<{ results: SongResult[] }>({
-    queryKey: ["/api/tmdb/search", title, mediaType],
+    queryKey: ["/api/tmdb/search", title, mediaType, artist],
     enabled: mediaType === "song" && !artist,
     queryFn: async () => {
       const params = new URLSearchParams({
         query: title,
         mediaType: "song"
       });
+      if (artist) {
+        params.append("artist", artist);
+      }
       const response = await fetch(`/api/tmdb/search?${params.toString()}`);
       if (!response.ok) {
         throw new Error("Failed to search songs");

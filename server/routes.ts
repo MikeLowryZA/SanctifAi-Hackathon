@@ -219,6 +219,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const schema = z.object({
         query: z.string().min(1),
         mediaType: z.enum(["movie", "show", "book", "song"]).optional(),
+        artist: z.string().optional(),
       });
 
       const validation = schema.safeParse(req.query);
@@ -229,11 +230,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
-      const { query, mediaType = "movie" } = validation.data;
-      
+      const { query, mediaType = "movie", artist } = validation.data;
+
       // Handle iTunes music search separately
       if (mediaType === "song") {
-        const results = await searchiTunes(query);
+        // Combine title and artist for better search results
+        const searchQuery = artist ? `${query} ${artist}` : query;
+        console.log('[iTunes Search Debug]', { mediaType, query, artist, searchQuery });
+        const results = await searchiTunes(searchQuery);
+        console.log('[iTunes Search Results]', { count: results.length });
         return res.json({ results });
       }
       
