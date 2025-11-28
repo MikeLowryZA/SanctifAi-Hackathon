@@ -220,7 +220,7 @@ export default function Results() {
                   alt={data.title}
                   className={
                     data.mediaType === "book"
-                      ? "max-w-[220px] h-auto rounded-xl shadow-lg bg-muted/30 p-2 border border-border/50"
+                      ? "max-w-[280px] h-auto rounded-xl shadow-lg bg-muted/30 p-2 border border-border/50"
                       : "w-full rounded-2xl shadow-lg"
                   }
                   style={data.mediaType === "book" ? { objectFit: "contain" } : {}}
