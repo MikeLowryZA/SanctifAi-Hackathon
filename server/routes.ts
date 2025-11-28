@@ -124,21 +124,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Load scripture analysis libs dynamically
-      const { extractSignals } = await import("../client/src/lib/extract.js");
-      const { scoreFromSignals } = await import("../client/src/lib/score.js");
+      const { extractLyricsSignals } = await import("../client/src/lib/extract.js");
+      const { scoreFromLyricsSignals, calibrateSongScore } = await import("../client/src/lib/score.js");
       const { getVerses } = await import("../client/src/lib/scripture.js");
-      
+
       // Load rules from YAML
       const { readFileSync } = await import("fs");
       const { parse: parseYaml } = await import("yaml");
       const rulesYaml = readFileSync("client/src/lib/rules.yaml", "utf8");
       const rules = parseYaml(rulesYaml);
 
-      // Extract signals from lyrics
-      const signals = extractSignals(lyrics);
+      // Extract lyrics-specific signals (profanity, sexual, violence, worship, etc.)
+      const lyricsSignals = extractLyricsSignals(lyrics);
 
-      // Score based on signals and rules
-      const score = scoreFromSignals(signals, rules);
+      // Score based on lyrics signals and rules
+      const rawScoreResult = scoreFromLyricsSignals(lyricsSignals, rules);
+
+      // Apply calibration to ensure explicit songs score low and worship songs score high
+      const calibratedTotal = calibrateSongScore(rawScoreResult.total, rawScoreResult.hits);
+
+      // Create final score result with calibrated total
+      const score = {
+        ...rawScoreResult,
+        total: calibratedTotal,
+      };
 
       // Fetch Bible verses for all unique anchors
       const uniqueRefs = new Set<string>();
@@ -157,7 +166,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         provider,
         cached: provider === 'cache',
         analysis: {
-          signals,
+          signals: lyricsSignals,
           score,
           verses,
         },
