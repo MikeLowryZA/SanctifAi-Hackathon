@@ -1,7 +1,7 @@
-// add near top
+// client/src/lib/extract.ts
+
 import { LYRICS_REGEX, normalizeLyrics, matchAny } from "@/lib/lexicons/lyrics";
 
-// later in your extractor, add a helper that you call when type === 'song' OR always if lyrics present
 export function extractLyricsSignals(lyricsRaw: string) {
   const text = normalizeLyrics(lyricsRaw);
 
