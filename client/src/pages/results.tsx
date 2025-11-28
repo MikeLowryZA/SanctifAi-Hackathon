@@ -213,11 +213,17 @@ export default function Results() {
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ duration: 0.5 }}
+                className={data.mediaType === "book" ? "flex justify-center" : ""}
               >
                 <img
                   src={data.posterUrl}
                   alt={data.title}
-                  className="w-full rounded-2xl shadow-lg"
+                  className={
+                    data.mediaType === "book"
+                      ? "max-w-[220px] h-auto rounded-xl shadow-lg bg-muted/30 p-2 border border-border/50"
+                      : "w-full rounded-2xl shadow-lg"
+                  }
+                  style={data.mediaType === "book" ? { objectFit: "contain" } : {}}
                   data-testid="img-poster"
                 />
               </motion.div>
