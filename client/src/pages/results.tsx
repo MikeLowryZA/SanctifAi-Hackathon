@@ -54,7 +54,7 @@ export default function Results() {
   // Fetch song search results using backend /api/search endpoint
   const { data: songSearchData, isLoading: isLoadingSongSearch } = useQuery<{ results: SongResult[] }>({
     queryKey: ["/api/tmdb/search", title, mediaType, artist],
-    enabled: mediaType === "song" && !artist,
+    enabled: mediaType === "song",
     queryFn: async () => {
       const params = new URLSearchParams({
         query: title,
@@ -155,6 +155,18 @@ export default function Results() {
                 <Loader2 className="w-12 h-12 text-primary animate-spin" />
                 <p className="text-muted-foreground">Searching iTunes...</p>
               </div>
+            ) : !isLoadingSongSearch && songSearchData && songSearchData.results && songSearchData.results.length === 0 ? (
+              <Card className="border-2 border-muted">
+                <CardContent className="pt-8 pb-8 text-center space-y-4">
+                  <Music className="w-12 h-12 text-muted-foreground mx-auto" />
+                  <div>
+                    <h3 className="text-lg font-semibold mb-2">No songs found for this title</h3>
+                    <p className="text-muted-foreground">
+                      You can still paste lyrics below to get a biblical discernment.
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
             ) : songSearchData?.results && songSearchData.results.length > 0 ? (
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
                 {songSearchData.results.map((song) => (
@@ -209,19 +221,7 @@ export default function Results() {
                   </Card>
                 ))}
               </div>
-            ) : (
-              <Card className="border-2 border-muted">
-                <CardContent className="pt-8 pb-8 text-center space-y-4">
-                  <Music className="w-12 h-12 text-muted-foreground mx-auto" />
-                  <div>
-                    <h3 className="text-lg font-semibold mb-2">No songs found for this title</h3>
-                    <p className="text-muted-foreground">
-                      You can still paste lyrics below to get a biblical discernment.
-                    </p>
-                  </div>
-                </CardContent>
-              </Card>
-            )}
+            ) : null}
           </motion.div>
 
           {/* STEP 2: Song Analysis */}
@@ -249,8 +249,8 @@ export default function Results() {
             </motion.div>
           )}
 
-          {/* Fallback: Show analysis input if no results */}
-          {!isLoadingSongSearch && (!songSearchData?.results || songSearchData.results.length === 0) && !selectedSong && (
+          {/* Fallback: Show analysis input when no song is selected */}
+          {!selectedSong && !isLoadingSongSearch && (
             <motion.div
               id="song-analysis"
               initial={{ opacity: 0, y: 20 }}
@@ -266,7 +266,7 @@ export default function Results() {
 
               <SongAnalysis
                 title={title}
-                artist=""
+                artist={artist || ""}
                 artwork={undefined}
                 album={undefined}
               />
