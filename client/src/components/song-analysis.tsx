@@ -247,41 +247,61 @@ export function SongAnalysis({ title, artist, artwork, album }: SongAnalysisProp
         </CardContent>
       </Card>
 
-      {/* Content Concerns */}
-      {analysis.score.hits.length > 0 && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Content Analysis</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {analysis.score.hits.map((hit, index) => (
-              <div key={index} className="border-l-4 border-primary pl-4 py-2">
-                <div className="flex items-center gap-2 mb-1">
-                  <Badge variant="secondary">{hit.category}</Badge>
-                  <Badge variant={hit.severity === "high" ? "destructive" : "secondary"}>
-                    {hit.severity}
-                  </Badge>
-                </div>
-                <p className="text-sm text-foreground">{hit.description}</p>
-                {hit.refs.length > 0 && (
-                  <div className="mt-2 space-y-2">
-                    {hit.refs.map((ref) => {
-                      const verse = analysis.verses[ref];
-                      if (!verse) return null;
-                      return (
-                        <div key={ref} className="bg-muted/50 p-3 rounded-md">
-                          <p className="text-sm font-medium text-primary mb-1">{ref}</p>
-                          <p className="text-sm italic">{verse.text}</p>
-                        </div>
-                      );
-                    })}
+      {/* Content Analysis */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Content Analysis</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          {/* Score-based explanation */}
+          <div className="text-sm text-muted-foreground leading-relaxed">
+            {analysis.score.total >= 80 ? (
+              <p>
+                Lyrics are clearly God-honoring (worship, gratitude, or Christ-centered themes) and no explicit or blasphemous language was detected.
+              </p>
+            ) : analysis.score.total < 40 ? (
+              <p>
+                Lyrics contain strong content concerns (for example explicit language, sexual themes, or similar). This song is unlikely to be spiritually helpful.
+              </p>
+            ) : (
+              <p>
+                Lyrics are mostly secular or mixed in theme. No major explicit content detected, but the song isn't clearly worshipful. Pray and use personal discernment in your context.
+              </p>
+            )}
+          </div>
+
+          {/* Content concerns/hits */}
+          {analysis.score.hits.length > 0 && (
+            <div className="space-y-4">
+              {analysis.score.hits.map((hit, index) => (
+                <div key={index} className="border-l-4 border-primary pl-4 py-2">
+                  <div className="flex items-center gap-2 mb-1">
+                    <Badge variant="secondary">{hit.category}</Badge>
+                    <Badge variant={hit.severity === "high" ? "destructive" : "secondary"}>
+                      {hit.severity}
+                    </Badge>
                   </div>
-                )}
-              </div>
-            ))}
-          </CardContent>
-        </Card>
-      )}
+                  <p className="text-sm text-foreground">{hit.description}</p>
+                  {hit.refs.length > 0 && (
+                    <div className="mt-2 space-y-2">
+                      {hit.refs.map((ref) => {
+                        const verse = analysis.verses[ref];
+                        if (!verse) return null;
+                        return (
+                          <div key={ref} className="bg-muted/50 p-3 rounded-md">
+                            <p className="text-sm font-medium text-primary mb-1">{ref}</p>
+                            <p className="text-sm italic">{verse.text}</p>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
 
       {/* Manual Input Option */}
       <div className="text-center">
