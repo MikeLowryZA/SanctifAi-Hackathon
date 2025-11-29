@@ -57,13 +57,23 @@ export const LYRICS_REGEX = {
     /\b(kill myself|end my life|suicide|overdose|OD\b|cut my (wrists|arms))\b/i,
   ],
   worship: [
+    // classic worship language
     /\b(praise|worship|adore|magnify)\b\s+(you|him|god|the lord|jesus)\b/i,
-    /\bholy\b.*\b(holy)\b/i,
+    /\bholy\b.*\bholy\b/i,
+    /\bhallelu(jah|ya|jah)\b/i,
+
+    // softer but clearly God-directed language
+    /\b(thank|thanking|grateful|give thanks)\b.*\b(god|jesus|christ|lord)\b/i,
+    /\b(you are|you're)\s+(good|faithful|worthy)\b.*\b(god|lord|jesus|king)\b/i,
+    /\b(king of kings|lord of lords)\b/i,
   ],
+
   repentance: [
-    /\b(repent|turn\s+away|confess|confession)\b/i,
-    /\b(grace|mercy)\b.*\b(through|in)\b.*\b(christ|jesus)\b/i,
+    /\b(repent|turn\s+away|turning\s+away|turn back)\b/i,
+    /\b(confess|confession)\b/i,
+    /\b(grace|mercy)\b.*\b(through|in)\b.*\b(christ|jesus|the cross)\b/i,
     /\bhope\b.*\b(christ|jesus|the lord)\b/i,
+    /\b(for\-?given|forgiveness)\b.*\b(you|by you|by god|by jesus|in christ)\b/i,
   ],
 };
 
