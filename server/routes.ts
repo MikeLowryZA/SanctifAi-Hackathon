@@ -99,7 +99,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Load scripture analysis libs dynamically
       const { extractLyricsSignals } = await import("../client/src/lib/extract.js");
-      const { scoreFromSignals } = await import("../client/src/lib/score.js");
+      const { scoreFromSignals, calibrateSongScore } = await import("../client/src/lib/score.js");
       const { getVerses } = await import("../client/src/lib/scripture.js");
 
       // Load rules from YAML
@@ -129,7 +129,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       };
 
       // Score based on lyrics signals and rules
-      const score = scoreFromSignals(signals, rules);
+      const rawScore = scoreFromSignals(signals, rules);
+      const score = calibrateSongScore(rawScore);
 
       // Fetch Bible verses for all unique anchors
       const uniqueRefs = new Set<string>();

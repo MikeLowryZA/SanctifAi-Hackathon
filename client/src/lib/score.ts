@@ -194,3 +194,43 @@ export function scoreFromSignals(
   const total = clamp(50 + hits.reduce((s, h) => s + h.weight, 0));
   return { total, hits };
 }
+
+export function calibrateSongScore(result: ScoreResult): ScoreResult {
+  const NEGATIVE_RULES = new Set<string>([
+    "explicit-language",
+    "explicit-sexual",
+    "explicit-violence",
+    "substance-abuse",
+    "occult-practices",
+    "blasphemy",
+    "self-harm",
+    "false-gospel",
+    "idolatry-materialism",
+  ]);
+
+  const POSITIVE_RULES = new Set<string>([
+    "worship",
+    "repentance-hope",
+    "salvation-by-grace",
+    "deity-of-christ",
+  ]);
+
+  const negatives = result.hits.filter((h) => NEGATIVE_RULES.has(h.ruleId));
+  const positives = result.hits.filter((h) => POSITIVE_RULES.has(h.ruleId));
+
+  let total = result.total;
+
+  if (negatives.length > 0) {
+    const cap = Math.max(15, 35 - 5 * (negatives.length - 1));
+    total = Math.min(total, cap);
+  }
+  else if (positives.length > 0) {
+    const base = 80 + Math.min(positives.length - 1, 2) * 5;
+    total = Math.max(total, base);
+  }
+  else {
+    total = clamp(total, 35, 75);
+  }
+
+  return { ...result, total };
+}
